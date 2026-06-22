@@ -448,33 +448,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
       }
 
-      return AnimatedSize(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        child: Container(
-          height: 44.0 + 8,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: GridView.count(
-            crossAxisCount: 7,
-            physics: const NeverScrollableScrollPhysics(),
-            children: weekDays,
-          ),
-        ),
+      return _buildFixedHeightCalendarGrid(
+        children: weekDays,
+        rows: 1,
       );
     }
 
-    final gridHeight = totalRows * 44.0 + 8;
+    return _buildFixedHeightCalendarGrid(
+      children: days,
+      rows: totalRows,
+    );
+  }
+
+  Widget _buildFixedHeightCalendarGrid({
+    required List<Widget> children,
+    required int rows,
+  }) {
+    const rowHeight = 48.0;
+    const verticalPadding = 8.0;
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      child: Container(
-        height: gridHeight,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: GridView.count(
-          crossAxisCount: 7,
-          physics: const NeverScrollableScrollPhysics(),
-          children: days,
+      child: SizedBox(
+        height: rows * rowHeight + verticalPadding,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final cellWidth = constraints.maxWidth / 7;
+              return GridView.count(
+                padding: EdgeInsets.zero,
+                crossAxisCount: 7,
+                childAspectRatio: cellWidth / rowHeight,
+                physics: const NeverScrollableScrollPhysics(),
+                children: children,
+              );
+            },
+          ),
         ),
       ),
     );

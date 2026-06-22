@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/constants/app_colors.dart';
@@ -163,6 +164,12 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                             ],
                           ),
                           const SizedBox(height: 12),
+                          if (_diaryImageUrls(state.entry!).isNotEmpty) ...[
+                            _buildDiaryPhotoPreview(
+                              _diaryImageUrls(state.entry!),
+                            ),
+                            const SizedBox(height: 14),
+                          ],
                           TextField(
                             controller: _textController,
                             maxLines: null,
@@ -291,6 +298,81 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
     } else {
       context.go('/home');
     }
+  }
+
+  List<String> _diaryImageUrls(DiaryEntry entry) {
+    return entry.mediaUrls.where(_isImageUrl).toList();
+  }
+
+  bool _isImageUrl(String url) {
+    final uri = Uri.tryParse(url);
+    final path = (uri?.path ?? url).toLowerCase();
+    return path.endsWith('.jpg') ||
+        path.endsWith('.jpeg') ||
+        path.endsWith('.png') ||
+        path.endsWith('.webp') ||
+        path.endsWith('.heic');
+  }
+
+  Widget _buildDiaryPhotoPreview(List<String> imageUrls) {
+    final remaining = imageUrls.length - 1;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: AspectRatio(
+        aspectRatio: 4 / 3,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            CachedNetworkImage(
+              imageUrl: imageUrls.first,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                color: AppColors.card,
+                child: Center(
+                  child: Icon(
+                    Icons.image_outlined,
+                    color: AppColors.textHint,
+                    size: 34,
+                  ),
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                color: AppColors.card,
+                child: Center(
+                  child: Icon(
+                    Icons.broken_image_outlined,
+                    color: AppColors.textHint,
+                    size: 34,
+                  ),
+                ),
+              ),
+            ),
+            if (remaining > 0)
+              Positioned(
+                right: 10,
+                bottom: 10,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.55),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    '+$remaining',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _confirmDelete(

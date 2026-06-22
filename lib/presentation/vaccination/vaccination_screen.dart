@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_strings.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/providers/health_providers.dart';
@@ -215,12 +214,12 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen> {
         },
       ),
       floatingActionButton: child != null
-          ? FloatingActionButton.extended(
+          ? FloatingActionButton(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
+              tooltip: '접종 추가',
               onPressed: () => _showAddVaccinationDialog(child),
-              icon: const Icon(Icons.add),
-              label: const Text('접종 추가'),
+              child: const Icon(Icons.add),
             )
           : null,
     );
